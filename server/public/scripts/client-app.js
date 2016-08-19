@@ -3,7 +3,45 @@ $(document).ready(function () {
 
   // add a book
   $('#book-submit').on('click', postBook);
+  $('#filter').on('click', genreSelected);
 });
+
+function getBooksByGenre(genre) {
+  $.ajax({
+    type: 'GET',
+    url: '/books/' + genre,
+    success: function (books) {
+      console.log("Books: ", books);
+      updateBooksList(books);
+    },
+
+    error: function (response) {
+      console.log('GET /books fail. No books could be retrieved!');
+    },
+  });
+}
+
+function genreSelected() {
+  console.log("Click");
+  var genre = $( "#selectMenu option:selected" ).text();
+  var genre = genre.toLowerCase();
+  $('#book-list').empty();
+  getBooksByGenre(genre);
+  return;
+}
+
+function updateBooksList(books) {
+  books.forEach(function (book) {
+    console.log("Book: ", book);
+    var $el = $('<li></li>');
+    $el.append('<strong>' + book.title + '</strong>');
+    $el.append(' <em>' + book.author + '</em');
+    $el.append(' <time>' + book.published + '</time>');
+    $el.append(' <strong>' + book.genre + '</strong>');
+    $('#book-list').append($el);
+  });
+}
+
 /**
  * Retrieve books from server and append to DOM
  */
@@ -12,14 +50,7 @@ function getBooks() {
     type: 'GET',
     url: '/books',
     success: function (books) {
-      console.log('GET /books returns:', books);
-      books.forEach(function (book) {
-        var $el = $('<li></li>');
-        $el.append('<strong>' + book.title + '</strong>');
-        $el.append(' <em>' + book.author + '</em');
-        $el.append(' <time>' + book.published + '</time>');
-        $('#book-list').append($el);
-      });
+      updateBooksList(books);
     },
 
     error: function (response) {
